@@ -2,7 +2,6 @@ import subprocess
 import pandas as pd
 import re
 
-# 只测试small和medium，避免大模型OOM
 model_configs = [
     {"size": "small", "d_model": 768, "d_ff": 3072, "num_layers": 12, "num_heads": 12},
     {"size": "medium", "d_model": 1024, "d_ff": 4096, "num_layers": 24, "num_heads": 16},
@@ -18,7 +17,7 @@ common_args = [
     '--batch_size', '8',
     '--context_length', '32',
     '--vocab_size', '1000',
-    '--device', 'cuda',  # 如需GPU可改为cuda
+    '--device', 'cuda', 
 ]
 
 def parse_output(output):
@@ -38,10 +37,6 @@ for cfg in model_configs:
     ] + common_args
     print(f"正在测试: {cfg['size']} ...")
     proc = subprocess.run(args, capture_output=True, text=True)
-    print("stdout:")
-    print(proc.stdout)
-    print("stderr:")
-    print(proc.stderr)
     avg, std = parse_output(proc.stdout)
     results.append({
         'size': cfg['size'],
