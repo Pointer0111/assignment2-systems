@@ -1,13 +1,14 @@
 import subprocess
 import pandas as pd
 import re
+from tabulate import tabulate
 
 model_configs = [
     {"size": "small", "d_model": 768, "d_ff": 3072, "num_layers": 12, "num_heads": 12},
-    {"size": "medium", "d_model": 1024, "d_ff": 4096, "num_layers": 24, "num_heads": 16},
-    {"size": "large", "d_model": 1280, "d_ff": 5120, "num_layers": 36, "num_heads": 20},
-    {"size": "xl", "d_model": 1600, "d_ff": 6400, "num_layers": 48, "num_heads": 25},
-    {"size": "2.7B", "d_model": 2560, "d_ff": 10240, "num_layers": 32, "num_heads": 32},
+    # {"size": "medium", "d_model": 1024, "d_ff": 4096, "num_layers": 24, "num_heads": 16},
+    # {"size": "large", "d_model": 1280, "d_ff": 5120, "num_layers": 36, "num_heads": 20},
+    # {"size": "xl", "d_model": 1600, "d_ff": 6400, "num_layers": 48, "num_heads": 25},
+    # {"size": "2.7B", "d_model": 2560, "d_ff": 10240, "num_layers": 32, "num_heads": 32},
 ]
 
 common_args = [
@@ -49,6 +50,8 @@ for cfg in model_configs:
     })
 
 df = pd.DataFrame(results)
-df.to_json('benchmark_results.json', orient='records', lines=True)
-print(df)
-print("结果已保存到 benchmark_results.json") 
+md_table = str(df.to_markdown(index=False))
+with open('benchmark_results.md', 'w') as f:
+    f.write(md_table)
+print(md_table)
+print("结果已保存到 benchmark_results.md") 
