@@ -3,7 +3,6 @@
 # 请先创建一个cuda_gelu文件夹，编译后会生成inline_gelu.so文件
 
 
-
 import os
 import sys
 from util import *
