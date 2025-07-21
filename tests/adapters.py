@@ -16,7 +16,6 @@ def get_flashattention_autograd_function_pytorch() -> Type:
     Returns:
         A class object (not an instance of the class)
     """
-    # For example: return MyRMSNormAutogradFunctionClass
     raise NotImplementedError
 
 
