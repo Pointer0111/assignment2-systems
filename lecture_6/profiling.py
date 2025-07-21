@@ -38,5 +38,54 @@ def profiling(is_composite: bool):
             mlp_profile = profile("mlp", run_mlp(dim=2048, num_layers=64, batch_size=1024, num_steps=2))
             print(mlp_profile)
 
+
+def run_transformer():
+
+    from cs336_basics.model import BasicsTransformerLM
+    from cs336_basics.optimizer import AdamW
+    from cs336_basics.nn_utils import cross_entropy
+
+    torch.manual_seed(42)
+
+    model = BasicsTransformerLM(
+        vocab_size=10000,
+        context_length=1024,
+        d_model=1024,
+        num_layers=12,
+        num_heads=16,
+        d_ff=4096,
+        rope_theta=10000,
+    )
+    model.to(get_device())
+
+    optimizer = AdamW(model.parameters(), lr=1e-3)
+
+    x = torch.randint(0, 10000, (1, 1024), device=get_device())
+    y = torch.randint(0, 10000, (1, 1024), device=get_device())
+
+    def run():
+        model.train()
+        out = model(x)
+        if torch.cuda.is_available():
+            torch.cuda.synchronize()
+        loss = cross_entropy(out, y)
+        loss.backward()
+        if torch.cuda.is_available():
+            torch.cuda.synchronize()  
+    return run
+    
+
+
 if __name__ == "__main__":
-    profiling(is_composite=True)
+    # profiling(is_composite=True)
+    transformer_profile = profile("transformer", run_transformer())
+    print(transformer_profile)
+
+
+
+
+
+    
+    
+    
+

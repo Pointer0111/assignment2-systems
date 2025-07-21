@@ -410,7 +410,7 @@ def scaled_dot_product_attention(
     Args:
         Q: Tensor of queries, may have any number of leading dimensions.
         K: Tensor of keys, sharing leading dimensions with Q.
-        V: Tensor of values, sharding leading dimensions with Q and K.
+        V: Tensor of values, sharing leading dimensions with Q and K.
         mask: An (optional) mask of shape (..., seq_len, seq_len).
             Attention scores for positions with a mask value of `False` should
             be masked out, i.e., not affect the softmaxed attention probabilities.
