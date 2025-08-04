@@ -70,10 +70,8 @@ class ToyModelWithTiedWeights(nn.Module):
 
 def _setup_process_group(rank, world_size, backend):
     os.environ["MASTER_ADDR"] = "localhost"
-    # 使用动态端口避免冲突
-    import random
-    port = random.randint(12391, 12400)
-    os.environ["MASTER_PORT"] = str(port)
+    os.environ["MASTER_PORT"] = "12355"
+    
     # https://discuss.pytorch.org/t/should-local-rank-be-equal-to-torch-cuda-current-device/150873/2
     if torch.cuda.is_available():
         device_count = torch.cuda.device_count()
@@ -86,8 +84,11 @@ def _setup_process_group(rank, world_size, backend):
         device = f"cuda:{local_rank}"
     else:
         device = "cpu"
-    # initialize the process group
-    dist.init_process_group(backend, rank=rank, world_size=world_size)
+    
+    # initialize the process group with timeout
+    import datetime
+    timeout = datetime.timedelta(seconds=30)
+    dist.init_process_group(backend, rank=rank, world_size=world_size, timeout=timeout)
     return device
 
 

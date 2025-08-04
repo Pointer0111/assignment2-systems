@@ -63,3 +63,9 @@ To submit, run `./test_and_make_submission.sh` . This script will install your
 code's dependencies, run tests, and create a gzipped tarball with the output. We
 should be able to unzip your submitted tarball and run
 `./test_and_make_submission.sh` to verify your test results.
+
+
+## 注意事项
+1. 在WSL运行优化器分片，会因为PyTorch的分布式后端无法在WSL环境中建立进程间的TCP连接而失败！
+
+2. 不能再`common.py`中使用随机端口！这样会导致进程间没法同步！
