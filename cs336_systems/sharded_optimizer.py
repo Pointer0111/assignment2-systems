@@ -48,9 +48,8 @@ class ShardedOptimizer(torch.optim.Optimizer):
         self.optimizer_kwargs = kwargs
         self.local_optimizer = optimizer_cls(self.local_params, **kwargs)
         
-        # 调用父类构造函数 - 需要传入参数组格式
-        # 我们传入所有参数，但实际只优化分配给当前rank的参数
-        param_groups = [{'params': all_params}]
+        # 调用父类构造函数 - 只传入本地参数
+        param_groups = [{'params': self.local_params}]
         super().__init__(param_groups, {})
 
     def step(self, closure=None, **kwargs):
@@ -72,10 +71,16 @@ class ShardedOptimizer(torch.optim.Optimizer):
     
     def _synchronize_parameters(self):
         """在所有rank之间同步参数"""
-        for param in self.all_params:
+        # 确保所有进程都到达同步点
+        dist.barrier()
+        
+        # 按照参数索引顺序进行广播，确保所有进程按相同顺序操作
+        for i, param in enumerate(self.all_params):
             responsible_rank = self.param_to_rank[param]
             # 从负责该参数的rank广播参数到所有其他rank
             dist.broadcast(param.data, src=responsible_rank)
+            # 每个广播后等待所有进程完成
+            dist.barrier()
 
     def add_param_group(self, param_group):
         """
@@ -87,7 +92,7 @@ class ShardedOptimizer(torch.optim.Optimizer):
         # 提取参数
         if isinstance(param_group, dict):
             new_params = param_group['params']
-            param_group_dict = param_group
+            param_group_dict = dict(param_group)  # 确保是可变的字典
         else:
             new_params = param_group
             param_group_dict = {'params': new_params}
@@ -105,7 +110,7 @@ class ShardedOptimizer(torch.optim.Optimizer):
         
         # 如果有分配给当前rank的新参数，添加到本地优化器
         if local_new_params:
-            local_param_group = param_group_dict.copy()
+            local_param_group = dict(param_group_dict)  # 创建新的可变字典
             local_param_group['params'] = local_new_params
             self.local_optimizer.add_param_group(local_param_group)
     
