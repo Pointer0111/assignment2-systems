@@ -68,4 +68,4 @@ should be able to unzip your submitted tarball and run
 ## 注意事项
 1. 在WSL运行优化器分片，会因为PyTorch的分布式后端无法在WSL环境中建立进程间的TCP连接而失败！
 
-2. 不能再`common.py`中使用随机端口！这样会导致进程间没法同步！
+2. 不能在`common.py`中使用随机端口！这样会导致进程间没法同步！
